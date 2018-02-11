@@ -1,9 +1,21 @@
 @import models.project.Project
+@import models.project.VisibilityTypes
 @(project: Project, classes: String = "")
 
-@defining(project.isVisible) { visible =>
-    <button class="btn-hide btn btn-sm btn-default @classes" data-project="@project.ownerName/@project.slug">
-        <i class="fa @if(visible) { fa-eye-slash } else { fa-eye }"></i>
-        <span>@if(visible) { Hide } else { Unhide }</span> project
-    </button>
+@defining(project.visibility) { visible =>
+    <div class="btn-group btn-group-sm">
+        <button class="btn btn-alert btn-hide-dropdown dropdown-toggle" type="button" id="visibility-actions" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-project="@project.ownerName/@project.slug" style="color: black">
+            <i class="fa fa-eye"></i> Visibility actions
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="visibility-actions">
+            @for(visibility <- VisibilityTypes.values.toSeq.sortBy(_.id)) {
+                <li>
+                    <a href="#" class="btn-hide" data-project="@project.ownerName/@project.slug" data-level="@visibility.id">
+                        @visibility.nameKey @if(project.visibility == visibility) { <i class="fa fa-check" style="color: black" aria-hidden="true"></i> }
+                    </a>
+                </li>
+            }
+        </ul>
+    </div>
 }
