@@ -1,6 +1,8 @@
 @import models.project.Project
 @import models.project.VisibilityTypes
-@(project: Project, classes: String = "")
+@import ore.OreConfig
+
+@(project: Project)
 
 @defining(project.visibility) { visible =>
     <div class="btn-group btn-group-sm">

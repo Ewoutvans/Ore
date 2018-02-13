@@ -2,6 +2,7 @@ package controllers.project
 
 import java.nio.file.{Files, Path}
 import java.sql.Timestamp
+import java.time.Instant
 import javax.inject.Inject
 
 import controllers.BaseController
@@ -502,7 +503,16 @@ class Projects @Inject()(stats: StatTracker,
   def setVisible(author: String, slug: String, visibility: Int) = {
     (AuthedProjectAction(author, slug, requireUnlock = true)
       andThen ProjectPermissionAction(HideProjects)) { implicit request =>
+      if (request.project.mostRecentChangeRequests.isDefined) {
+        val changeRequest = request.project.mostRecentChangeRequests.get
+        changeRequest.setResolvedAt(Timestamp.from(Instant.now()))
+        changeRequest.setResolvedBy(request.user)
+      }
       request.project.setVisibility(VisibilityTypes.withId(visibility))
+      if (visibility == VisibilityTypes.NeedsChanges.id) {
+        val comment = this.forms.NeedsChanges.bindFromRequest.get.trim
+        request.project.changeRequest(comment, request.user)
+      }
       Ok
     }
   }

@@ -37,7 +37,27 @@
                     <div class="panel-heading">
                         <h3 class="panel-title pull-left">@messages("project.settings")</h3>
                         @if(userBase.current.get can HideProjects in GlobalScope) {
-                            @projects.utils.btnHide(project, "pull-right")
+                            @projects.utils.btnHide(project)
+
+                            <div class="modal fade" id="modal-visibility-needschanges" tabindex="-1" role="dialog" aria-labelledby="modal-visibility-needschanges">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                            <h4 class="modal-title">Needs Changes</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <textarea class="textarea-needschanges form-control" rows="3"></textarea>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button class="btn btn-default">Close</button>
+                                            <button class="btn btn-visibility-needschanges-submit btn-primary"><i class="fa fa-pencil"></i> Submit</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         }
                     </div>
 

@@ -8,10 +8,16 @@ The main header displayed on each layout.
 @import ore.OreConfig
 @import ore.permission.scope.GlobalScope
 @import ore.permission._
+@import models.admin.ChangeRequest
+@import db.ModelFilter
+@import db.impl.OrePostgresDriver.api._
+
 @(user: Boolean = true)(implicit messages: Messages, request: Request[_], service: ModelService, config: OreConfig,
         users: UserBase)
 
 @flags = @{ service.access[Flag](classOf[Flag]) }
+
+@changeRequests = @{ service.access[ChangeRequest](classOf[ChangeRequest]) }
 
 @tooltip(title: String) = @{
     Html("data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"" + title + "\"")
@@ -123,6 +129,20 @@ The main header displayed on each layout.
                                     <span class="flags pull-left">
                                         @messages("project.flag.plural")
                                         @if(flags.filterNot(_.isResolved).nonEmpty) {
+                                            <span class="unread"></span>
+                                        }
+                                    </span>
+                                    <i class="pull-right fa fa-flag"></i>
+                                </a>
+                            </li>
+                        }
+
+                        @if(user can ReviewVisibility in GlobalScope) {
+                            <li>
+                                <a href="@routes.Application.showFlags()">
+                                    <span class="flags pull-left">
+                                        Visibility approvals
+                                        @if(changeRequests.nonEmpty) {
                                             <span class="unread"></span>
                                         }
                                     </span>

@@ -1,6 +1,7 @@
 package models.project
 
 import java.sql.Timestamp
+import java.time.Instant
 
 import com.google.common.base.Preconditions._
 import db.access.ModelAccess
@@ -12,7 +13,7 @@ import db.impl.schema.ProjectSchema
 import db.impl.table.ModelKeys
 import db.impl.table.ModelKeys._
 import db.{ModelService, Named}
-import models.admin.ProjectLog
+import models.admin.{ChangeRequest, ProjectLog, Review}
 import models.api.ProjectApiKey
 import models.statistic.ProjectView
 import models.user.User
@@ -281,6 +282,24 @@ case class Project(override val id: Option[Int] = None,
   def setVisibility(visibility: Visibility) = {
     this._visibility = visibility
     if (isDefined) update(ModelKeys.Visibility)
+  }
+
+  /**
+    * Get ChangeRequests
+    */
+  def changeRequests = this.schema.getChildren[ChangeRequest](classOf[ChangeRequest], this)
+  def byCreationDate(first: ChangeRequest, second: ChangeRequest) = first.createdAt.getOrElse(Timestamp.from(Instant.MIN)).getTime < second.createdAt.getOrElse(Timestamp.from(Instant.MIN)).getTime
+  def unfinishedChangeRequests: Seq[ChangeRequest] = changeRequests.all.toSeq.filter(cr => cr.createdAt.isDefined && cr.resolvedAt.isEmpty).sortWith(byCreationDate)
+  def mostRecentChangeRequests: Option[ChangeRequest] = unfinishedChangeRequests.headOption
+
+  /**
+    *
+    * @param comment
+    * @param creator
+    * @return
+    */
+  def changeRequest(comment: String, creator: User) = {
+    this.service.access[ChangeRequest](classOf[ChangeRequest]).add(ChangeRequest(id = None, createdAt = Some(Timestamp.from(Instant.now())), this.id.get, comment, creator.id.get, None, None))
   }
 
   /**
